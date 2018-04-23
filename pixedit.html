@@ -2,36 +2,54 @@
 <head>
 <body>
 <canvas id="canvas" style="border: 1px solid black" width="640" height="640"></canvas>
+<canvas id="touched" style="border: 1px solid red" width="16" height="16"></canvas>
 <div id="palette"></div>
 <div id="modsleft"></div>
 </body>
 <script>
 
 (function() {
-  var canvas = document.getElementById("canvas");
+  canvas = document.getElementById("canvas");
   var cx = canvas.getContext('2d');
+
+  var SCALE = 40;
+  var SIZEX = canvas.width/SCALE;
+  var SIZEY = canvas.height/SCALE;
+  
+  var touched = document.getElementById("touched");
+  var touchcx = touched.getContext('2d');
 
   var lastx = 0;
   var lasty = 0;
   var lastdown = false;
 
-  var modsleft = 64*64;
+  var modsleft = SIZEX*SIZEY/2;
 
   var putpixel = function(x,y) {
-    if (modsleft > 0) {
-      var screenx = Math.floor(x)*10;
-      var screeny = Math.floor(y)*10;
-      cx.fillRect(screenx, screeny, 10, 10);
-      modsleft--;
-      document.getElementById("modsleft").innerText = modsleft;
+    x = Math.floor(x);
+    y = Math.floor(y);
+    if (x < 0 || y < 0 || x >= SIZEX || y >= SIZEY) return;
+
+    var toucheddata = touchcx.getImageData(x,y,1,1).data;
+    if (toucheddata[3] == 0) {
+      if (modsleft > 0) {
+        modsleft--;
+        document.getElementById("modsleft").innerText = modsleft;
+      }
+      else {
+        return;
+      }
+      touchcx.fillStyle = '#000000';
+      touchcx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
     }
+    cx.fillRect(Math.floor(x)*SCALE, Math.floor(y)*SCALE, SCALE, SCALE);
   };
 
   var mousehandler = function(e) {
     if (!e.buttons) { lastdown = false; return; }
 
-    var newx = Math.floor(e.clientX - canvas.offsetLeft)/10;
-    var newy = Math.floor(e.clientY - canvas.offsetTop)/10;
+    var newx = Math.floor(e.clientX - canvas.offsetLeft)/SCALE;
+    var newy = Math.floor(e.clientY - canvas.offsetTop)/SCALE;
     if (lastdown) {
       var veclen = Math.sqrt((newx-lastx)*(newx-lastx)+(newy-lasty)*(newy-lasty));
       var vx = (newx-lastx)/veclen;
