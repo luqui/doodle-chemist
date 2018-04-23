@@ -8,17 +8,42 @@
 
 (function() {
   var canvas = document.getElementById("canvas");
-  cx = canvas.getContext('2d');
+  var cx = canvas.getContext('2d');
 
-  canvas.addEventListener('click', function(e) {
-    var x = e.clientX - canvas.offsetLeft;
-    var y = e.clientY - canvas.offsetTop;
+  var lastx = 0;
+  var lasty = 0;
+  var lastdown = false;
 
-    x = Math.floor(x/10)*10;
-    y = Math.floor(y/10)*10;
+  var putpixel = function(e) {
+    if (!e.buttons) { lastdown = false; return; }
+    var newx = Math.floor(e.clientX - canvas.offsetLeft)/10;
+    var newy = Math.floor(e.clientY - canvas.offsetTop)/10;
+    if (lastdown) {
+      var veclen = Math.sqrt((newx-lastx)*(newx-lastx)+(newy-lasty)*(newy-lasty));
+      var vx = (newx-lastx)/veclen;
+      var vy = (newy-lasty)/veclen;
+      
+      for (var t = 0; t <= veclen; t++) {
+        var x = Math.floor(vx*t + lastx)*10;
+        var y = Math.floor(vy*t + lasty)*10;
+        cx.fillRect(x, y, 10, 10);
+      }
+      lastx = newx;
+      lasty = newy;
+    }
+    else {
+      var x = Math.floor(newx)*10;
+      var y = Math.floor(newy)*10;
+      cx.fillRect(x, y, 10, 10);
+      lastx = newx;
+      lasty = newy;
+      lastdown = true;
+    }
+  };
 
-    cx.fillRect(x, y, 10, 10);
-  });
+  canvas.addEventListener('mousedown', putpixel);
+  canvas.addEventListener('mousemove', putpixel);
+  canvas.addEventListener('mouseup', putpixel);
 
   var palette = document.getElementById("palette");
   var paletteColors = [ 
