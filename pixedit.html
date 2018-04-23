@@ -3,6 +3,7 @@
 <body>
 <canvas id="canvas" style="border: 1px solid black" width="640" height="640"></canvas>
 <div id="palette"></div>
+<div id="modsleft"></div>
 </body>
 <script>
 
@@ -14,8 +15,21 @@
   var lasty = 0;
   var lastdown = false;
 
-  var putpixel = function(e) {
+  var modsleft = 64*64;
+
+  var putpixel = function(x,y) {
+    if (modsleft > 0) {
+      var screenx = Math.floor(x)*10;
+      var screeny = Math.floor(y)*10;
+      cx.fillRect(screenx, screeny, 10, 10);
+      modsleft--;
+      document.getElementById("modsleft").innerText = modsleft;
+    }
+  };
+
+  var mousehandler = function(e) {
     if (!e.buttons) { lastdown = false; return; }
+
     var newx = Math.floor(e.clientX - canvas.offsetLeft)/10;
     var newy = Math.floor(e.clientY - canvas.offsetTop)/10;
     if (lastdown) {
@@ -24,26 +38,22 @@
       var vy = (newy-lasty)/veclen;
       
       for (var t = 0; t <= veclen; t++) {
-        var x = Math.floor(vx*t + lastx)*10;
-        var y = Math.floor(vy*t + lasty)*10;
-        cx.fillRect(x, y, 10, 10);
+        putpixel(vx*t + lastx, vy*t + lasty);
       }
       lastx = newx;
       lasty = newy;
     }
     else {
-      var x = Math.floor(newx)*10;
-      var y = Math.floor(newy)*10;
-      cx.fillRect(x, y, 10, 10);
+      putpixel(newx, newy);
       lastx = newx;
       lasty = newy;
       lastdown = true;
     }
   };
 
-  canvas.addEventListener('mousedown', putpixel);
-  canvas.addEventListener('mousemove', putpixel);
-  canvas.addEventListener('mouseup', putpixel);
+  canvas.addEventListener('mousedown', mousehandler);
+  canvas.addEventListener('mousemove', mousehandler);
+  canvas.addEventListener('mouseup', mousehandler);
 
   var palette = document.getElementById("palette");
   var paletteColors = [ 
