@@ -1,101 +1,20 @@
 <html>
 <head>
-<body>
-<canvas id="canvas" style="border: 1px solid black" width="640" height="640"></canvas>
-<canvas id="touched" style="border: 1px solid red" width="16" height="16"></canvas>
-<div id="palette"></div>
-<div id="modsleft"></div>
-</body>
+<script src="jquery-3.3.1.js"></script>
+<script src="pixedit.js"></script>
 <script>
-
-(function() {
-  canvas = document.getElementById("canvas");
-  var cx = canvas.getContext('2d');
-
-  var SCALE = 40;
-  var SIZEX = canvas.width/SCALE;
-  var SIZEY = canvas.height/SCALE;
-  
-  var touched = document.getElementById("touched");
-  var touchcx = touched.getContext('2d');
-
-  var lastx = 0;
-  var lasty = 0;
-  var lastdown = false;
-
-  var modsleft = SIZEX*SIZEY/2;
-
-  var putpixel = function(x,y) {
-    x = Math.floor(x);
-    y = Math.floor(y);
-    if (x < 0 || y < 0 || x >= SIZEX || y >= SIZEY) return;
-
-    var toucheddata = touchcx.getImageData(x,y,1,1).data;
-    if (toucheddata[3] == 0) {
-      if (modsleft > 0) {
-        modsleft--;
-        document.getElementById("modsleft").innerText = modsleft;
-      }
-      else {
-        return;
-      }
-      touchcx.fillStyle = '#000000';
-      touchcx.fillRect(Math.floor(x), Math.floor(y), 1, 1);
-    }
-    cx.fillRect(Math.floor(x)*SCALE, Math.floor(y)*SCALE, SCALE, SCALE);
-  };
-
-  var mousehandler = function(e) {
-    if (!e.buttons) { lastdown = false; return; }
-
-    var newx = Math.floor(e.clientX - canvas.offsetLeft)/SCALE;
-    var newy = Math.floor(e.clientY - canvas.offsetTop)/SCALE;
-    if (lastdown) {
-      var veclen = Math.sqrt((newx-lastx)*(newx-lastx)+(newy-lasty)*(newy-lasty));
-      var vx = (newx-lastx)/veclen;
-      var vy = (newy-lasty)/veclen;
-      
-      for (var t = 0; t <= veclen; t++) {
-        putpixel(vx*t + lastx, vy*t + lasty);
-      }
-      lastx = newx;
-      lasty = newy;
-    }
-    else {
-      putpixel(newx, newy);
-      lastx = newx;
-      lasty = newy;
-      lastdown = true;
-    }
-  };
-
-  canvas.addEventListener('mousedown', mousehandler);
-  canvas.addEventListener('mousemove', mousehandler);
-  canvas.addEventListener('mouseup', mousehandler);
-
-  var palette = document.getElementById("palette");
-  var paletteColors = [ 
-    "#000000",
-    "#0000ff",
-    "#00ff00",
-    "#00ffff",
-    "#ff0000",
-    "#ff00ff",
-    "#ffff00",
-    "#ffffff" ];
-
-  for (var i = 0; i < paletteColors.length; i++) {
-    (function() {
-      var entry = document.createElement("span");
-      var color = paletteColors[i];
-      entry.setAttribute("style", 
-        "display: inline-block; width: 50px; height: 50px; border: 1px solid black; background-color: " + color);
-      entry.addEventListener("click", function(e) {
-        cx.fillStyle = color;
-      });
-      document.body.appendChild(entry);
-    })();
-  }
-})();
+$(function() {
+  PixEditor({
+    container: $('#container')[0],
+    width: 32, 
+    height: 32,
+    scale: 10,
+    modlimit: 32
+  });
+});
 </script>
+</head>
+<body>
+<div id="container"></div>
+</body>
 </html>
