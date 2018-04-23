@@ -14,11 +14,7 @@ var canvas = $('<canvas>').attr('style',  'border: 1px solid black')
 var cx = canvas.getContext('2d');
 cx.fillStyle = '#000000';
 
-var touched = $('<canvas>').attr('width', PARAMS.width)
-                           .attr('height', PARAMS.height)
-                           [0];
-var touchcx = touched.getContext('2d');
-touchcx.fillStyle = '#000000';
+var touched = new Int8Array(PARAMS.width * PARAMS.height);
 
 var modscounter = $('<div>').text("0/" + PARAMS.modlimit);
 var mods = 0;
@@ -29,8 +25,7 @@ var putpixel = function(x,y) {
   y = Math.floor(y);
   if (x < 0 || y < 0 || x >= PARAMS.width || y >= PARAMS.height) return;
 
-  var toucheddata = touchcx.getImageData(x,y,1,1).data;
-  if (toucheddata[3] == 0) {
+  if (touched[PARAMS.width*x + y] == 0) {
     if (mods < PARAMS.modlimit) {
       mods++;
       modscounter.text(mods + "/" + PARAMS.modlimit);
@@ -38,7 +33,7 @@ var putpixel = function(x,y) {
     else {
       return;
     }
-    touchcx.fillRect(x, y, 1, 1);
+    touched[PARAMS.width*x + y] = 1;
   }
   cx.fillRect(x*PARAMS.scale, y*PARAMS.scale, PARAMS.scale, PARAMS.scale);
 };
@@ -97,7 +92,12 @@ var handlescroll = function(e) {
 
 var handletouch = function(e) {
   handlescroll(e);
-  return handlegeneral(e.touches[0].pageX, e.touches[0].pageY, true);
+  if (e.touches.length > 0) {
+    return handlegeneral(e.touches[0].pageX, e.touches[0].pageY, true);
+  }
+  else {
+    return handlegeneral(0, 0, false);
+  }
 };
 
 var palette = $('<div>');
@@ -130,6 +130,7 @@ canvas.addEventListener('mousemove', handlemouse);
 canvas.addEventListener('mouseup', handlemouse);
 canvas.addEventListener('touchstart', handletouch);
 canvas.addEventListener('touchmove', handletouch);
+canvas.addEventListener('touchend', handletouch);
 canvas.addEventListener('scroll', handlescroll);
 
 PARAMS.container.appendChild(canvas);
