@@ -4,17 +4,28 @@
 <script src="pixedit.js"></script>
 <script>
 $(function() {
-  PixEditor({
+  var data;
+
+  var editor = PixEditor({
     container: $('#container')[0],
     width: 32, 
     height: 32,
     scale: 20,
     modlimit: 32*32
   });
+
+  $('#save').click(function() {
+    data = editor.toArray();
+  });
+  $('#load').click(function() {
+    editor.loadArray(data);
+  });
 });
 </script>
 </head>
 <body>
 <div id="container"></div>
+<button id="save">Save</button>
+<button id="load">Load</button>
 </body>
 </html>
