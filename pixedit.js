@@ -169,15 +169,16 @@ var rgbaToHex = function(r,g,b,a) {
 };
 
 $$.loadArray = function(data) {
-  var localcx = canvas.getContext('2d');
-  localcx.clearRect(0, 0, canvas.width, canvas.height);
+  var prevFillStyle = cx.fillStyle;
+  cx.clearRect(0, 0, canvas.width, canvas.height);
   for (var y = 0; y < PARAMS.height; y++) {
     for (var x = 0; x < PARAMS.width; x++) {
       var ix = 4*(PARAMS.width*y + x);
-      localcx.fillStyle = rgbaToHex(data[ix+0], data[ix+1], data[ix+2], data[ix+3]);
-      localcx.fillRect(x*PARAMS.scale, y*PARAMS.scale, PARAMS.scale, PARAMS.scale);
+      cx.fillStyle = rgbaToHex(data[ix+0], data[ix+1], data[ix+2], data[ix+3]);
+      cx.fillRect(x*PARAMS.scale, y*PARAMS.scale, PARAMS.scale, PARAMS.scale);
     }
   }
+  cx.fillStyle = prevFillStyle;
 };
 
 return $$;
