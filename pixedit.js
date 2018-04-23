@@ -60,13 +60,12 @@ var lastmousex = 0;
 var lastmousey = 0;
 var lastdown = false;
 
-var handlemouse = function(e) {
-  if (!e.buttons) { lastdown = false; return; }
-
+var handlegeneral = function(x, y, button) {
+  if (!button) { lastdown = false; return; }
   var canvasPos = findPos(canvas);
 
-  var newx = Math.floor((e.pageX - canvasPos.x)/PARAMS.scale);
-  var newy = Math.floor((e.pageY - canvasPos.y)/PARAMS.scale);
+  var newx = Math.floor((x - canvasPos.x)/PARAMS.scale);
+  var newy = Math.floor((y - canvasPos.y)/PARAMS.scale);
   if (lastdown) {
     var veclen = Math.sqrt(
         (newx-lastmousex)*(newx-lastmousex)
@@ -84,6 +83,21 @@ var handlemouse = function(e) {
   lastdown = true;
   lastmousex = newx;
   lastmousey = newy;
+  return true;
+};
+
+var handlemouse = function(e) {
+  return handlegeneral(e.pageX, e.pageY, e.buttons);
+};
+
+var handlescroll = function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+};
+
+var handletouch = function(e) {
+  handlescroll(e);
+  return handlegeneral(e.touches[0].pageX, e.touches[0].pageY, true);
 };
 
 var palette = $('<div>');
@@ -114,6 +128,9 @@ for (var i = 0; i < paletteColors.length; i++) {
 canvas.addEventListener('mousedown', handlemouse);
 canvas.addEventListener('mousemove', handlemouse);
 canvas.addEventListener('mouseup', handlemouse);
+canvas.addEventListener('touchstart', handletouch);
+canvas.addEventListener('touchmove', handletouch);
+canvas.addEventListener('scroll', handlescroll);
 
 PARAMS.container.appendChild(canvas);
 PARAMS.container.appendChild(modscounter[0]);
