@@ -5,6 +5,7 @@
 //   modlimit:      the number of modifed pixels allowed
 //   base:          an image to start from (optional)
 //   callback:      what to do when the "done" button is pressed
+//   title:         the title of the editor (what image is being edited)
 PixEditor = function(PARAMS) {
 
 var $$ = {};
@@ -37,8 +38,7 @@ else {
 
 var touched = new Int8Array(PARAMS.width * PARAMS.height);
 
-var modscounter = $('<span>').css('font-size', '30px')
-                             .css('font-family', 'monospace');
+var modscounter = $('<span>').addClass('modsCounter');
 var mods;
 
 
@@ -179,16 +179,13 @@ var selectedColor = null;
 for (var i = 0; i < paletteColors.length; i++) {
   (function() {
     var color = paletteColors[i];
-    var entry = $('<span>').css('display', 'inline-block')
-                           .css('width', '64px')
-                           .css('height', '64px')
-                           .css('border', '8px solid #664433')
+    var entry = $('<span>').addClass('paletteColor')
                            .css('background-color', color);
     if (selectedColor == null) { selectedColor = entry; }
     entry.click(function(e) {
       cx.fillStyle = color;
-      selectedColor.css('border', '8px solid #664433');
-      entry.css('border', '8px solid white');
+      selectedColor.removeClass('selected');
+      entry.addClass('selected');
       selectedColor = entry;
     });
     palette.append(entry);
@@ -204,16 +201,19 @@ canvas.addEventListener('touchmove', handletouch);
 canvas.addEventListener('touchend', handletouch);
 canvas.addEventListener('scroll', handlescroll);
 
+$(PARAMS.container).append($('<div>').addClass('topBar').append(
+  $('<span>').addClass('resetButton').append(
+    $('<button>').text("Reset")
+                 .click(reset)),
+  $('<span>').addClass('elementTitle').text(PARAMS.title),
+  $('<span>').append(
+    modscounter),
+  $('<span>').addClass('doneButton').append(
+    $('<button>').text("Done")
+                 .click(function() { if (PARAMS.callback) PARAMS.callback(); }))));
 PARAMS.container.appendChild(canvas);
 PARAMS.container.appendChild($('<div>').append(
-  palette,
-  modscounter)[0]);
-PARAMS.container.appendChild($('<button>').text("Reset")
-                                          .click(reset)
-                                          [0]);
-PARAMS.container.appendChild($('<button>').text("Done")
-                                          .click(function() { if (PARAMS.callback) PARAMS.callback(); })
-                                          [0]);
+  palette)[0]);
 
 $$.toArray = function() {
   var data = Array(PARAMS.height * PARAMS.width * 4);
