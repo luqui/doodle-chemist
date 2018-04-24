@@ -154,7 +154,6 @@ var paletteColors = [
   "#008888",
   "#0088ff",
   "#00ff00",
-  "#00ff88",
   "#00ffff",
   "#880000",
   "#880088",
@@ -166,10 +165,8 @@ var paletteColors = [
   "#88ff88",
   "#88ffff",
   "#ff0000",
-  "#ff0088",
   "#ff00ff",
   "#ff8800",
-  "#ff8888",
   "#ff88ff",
   "#ffff00",
   "#ffff88",
@@ -180,17 +177,16 @@ for (var i = 0; i < paletteColors.length; i++) {
   (function() {
     var color = paletteColors[i];
     var entry = $('<span>').css('display', 'inline-block')
-                           .css('width', '50px')
-                           .css('height', '50px')
-                           .css('border', '1px solid black')
-                           .css('margin', '5px')
+                           .css('width', '64px')
+                           .css('height', '64px')
+                           .css('margin', '8px')
                            .css('background-color', color);
     if (selectedColor == null) { selectedColor = entry; }
     entry.click(function(e) {
       cx.fillStyle = color;
-      selectedColor.css('border', '1px solid black');
-      selectedColor.css('margin', '5px');
-      entry.css('border', '6px groove');
+      selectedColor.css('border', 'none');
+      selectedColor.css('margin', '8px');
+      entry.css('border', '8px solid white');
       entry.css('margin', '0px');
       selectedColor = entry;
     });
