@@ -3,6 +3,8 @@
 //   width, height: the size of the image
 //   scale:         the width (in pixels) of each pixel
 //   modlimit:      the number of modifed pixels allowed
+//   base:          an image to start from (optional)
+//   callback:      what to do when the "done" button is pressed
 PixEditor = function(PARAMS) {
 
 var $$ = {};
@@ -14,12 +16,53 @@ var canvas = $('<canvas>').attr('style',  'border: 1px solid black')
 var cx = canvas.getContext('2d');
 cx.fillStyle = '#000000';
 
+
+var baseimg = null;
+var baseimg_loaded = false;
+if (PARAMS.base !== undefined) {
+  if (typeof(PARAMS.base) === 'string') {
+    baseimg = $('<img>').attr('src', PARAMS.base)
+                        [0];
+    baseimg.onload = function() { baseimg_loaded = true; reset() };
+  }
+}
+else if (PARAMS.base) {
+  baseimg_loaded = true;
+  baseimg = PARAMS.base;
+}
+else {
+  baseimg_loaded = false;
+}
+
+
+
 var touched = new Int8Array(PARAMS.width * PARAMS.height);
 
 var modscounter = $('<span>').css('font-size', '30px')
-                             .css('font-family', 'monospace')
-                             .text("0/" + PARAMS.modlimit);
-var mods = 0;
+                             .css('font-family', 'monospace');
+var mods;
+
+
+var reset = function() {
+  mods = 0;
+  modscounter.text("0/" + PARAMS.modlimit);
+  if (!baseimg) {
+    cx.clearRect(0,0,canvas.width,canvas.height);
+    return;
+  }
+
+  if (baseimg_loaded) {
+    var scalex = canvas.width/baseimg.width;
+    var scaley = canvas.height/baseimg.height;
+    cx.scale(scalex, scaley);
+    cx.imageSmoothingEnabled = false;
+    cx.drawImage(baseimg, 0, 0);
+    cx.scale(1/scalex, 1/scaley);
+  }
+};
+
+reset();
+
 
 
 var putpixel = function(x,y) {
@@ -148,6 +191,12 @@ PARAMS.container.appendChild(canvas);
 PARAMS.container.appendChild($('<div>').append(
   palette,
   modscounter)[0]);
+PARAMS.container.appendChild($('<button>').text("Reset")
+                                          .click(reset)
+                                          [0]);
+PARAMS.container.appendChild($('<button>').text("Done")
+                                          .click(function() { if (PARAMS.callback) PARAMS.callback(); })
+                                          [0]);
 
 $$.toArray = function() {
   var data = Array(PARAMS.height * PARAMS.width * 4);
