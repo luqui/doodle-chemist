@@ -9,8 +9,7 @@ PixEditor = function(PARAMS) {
 
 var $$ = {};
 
-var canvas = $('<canvas>').attr('style',  'border: 1px solid black')
-                          .attr('width', PARAMS.width * PARAMS.scale)
+var canvas = $('<canvas>').attr('width', PARAMS.width * PARAMS.scale)
                           .attr('height', PARAMS.height * PARAMS.scale)
                           [0];
 var cx = canvas.getContext('2d');
@@ -58,6 +57,10 @@ var reset = function() {
     cx.imageSmoothingEnabled = false;
     cx.drawImage(baseimg, 0, 0);
     cx.scale(1/scalex, 1/scaley);
+  }
+
+  for (var i = 0; i < touched.length; i++) {
+    touched[i] = 0;
   }
 };
 
@@ -179,15 +182,13 @@ for (var i = 0; i < paletteColors.length; i++) {
     var entry = $('<span>').css('display', 'inline-block')
                            .css('width', '64px')
                            .css('height', '64px')
-                           .css('margin', '8px')
+                           .css('border', '8px solid #664433')
                            .css('background-color', color);
     if (selectedColor == null) { selectedColor = entry; }
     entry.click(function(e) {
       cx.fillStyle = color;
-      selectedColor.css('border', 'none');
-      selectedColor.css('margin', '8px');
+      selectedColor.css('border', '8px solid #664433');
       entry.css('border', '8px solid white');
-      entry.css('margin', '0px');
       selectedColor = entry;
     });
     palette.append(entry);
