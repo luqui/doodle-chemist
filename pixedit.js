@@ -84,7 +84,7 @@ var handlegeneral = function(x, y, button) {
 };
 
 var handlemouse = function(e) {
-  return handlegeneral(e.pageX, e.pageY, e.buttons);
+  return handlegeneral(e.pageX, e.pageY, e.which);
 };
 
 var handlescroll = function(e) {
