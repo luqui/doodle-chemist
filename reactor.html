@@ -1,6 +1,7 @@
 <html>
 <head>
 <script src="jquery-3.3.1.js"></script>
+<script src="reactor.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
 <!-- <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-auth.js"></script>
@@ -32,60 +33,7 @@
   //     ...
   //   }
   var db = firebase.firestore();
-
-  var reactor = function(container) {
-    container.empty();
-    db.collection("reactions").orderBy("demand", "desc").limit(1).get()
-      .then(function(docs) {
-        var fail = function() {
-          container.append($('<span>').text("Nope"));
-          container.append($('<button>').text("Try again").click(function() { reactor(container); }));
-        };
-        var success = function() {  
-          container.append($('<span>').text("Good job"));
-          container.append($('<button>').text("Do another").click(function() { reactor(container); }));
-        };
-        if (docs.empty) { console.log("No reactions"); fail(); return; }
-
-        var doc = docs.docs[0];
-        var reagents = doc.id.split(":");
-        var proposedBox = $('<input>').attr('type', 'text');
-        var okbutton = $('<button>').text('Ok');
-        container.append(
-          $('<span>').text(reagents[0] + " + " + reagents[1] + " = "),
-          proposedBox,
-          okbutton);
-        
-        okbutton.click(function() {
-          var proposed = proposedBox.val();
-          var docref = db.collection("reactions").doc(doc.id);
-          db.runTransaction(function(transaction) {
-            return transaction.get(docref)
-              .then(function(q) {
-                var data = q.data();
-                if (!(proposed in data.results)) {
-                  data.results[proposed] = 1;
-                }
-                else {
-                  data.results[proposed]++;
-                }
-                data.demand--;
-                transaction.set(docref, data);
-
-                var proposedCount = data.results[proposed];
-                if (proposedCount < 3) { return false; }
-                for (var i in q.results) {
-                  if (q.results[i] >= proposedCount) { return false; }
-                }
-                return true;
-              });
-          }).then(function(succeeded) {
-            if (succeeded) { success(); } else { fail(); }
-          });
-        });
-      });
-  };
-
+  db.settings({timestampsInSnapshots: true});
 
   var laboratory = function(container) {
     var elements = ['earth', 'water', 'fire', 'air'];
@@ -165,14 +113,23 @@
   };
 
   $(function() {
-    reactor($('#reactor'));
+    var reactor = Reactor({
+      container: $('#reactor')[0],
+      database: db
+    });
+    $('#reactbutton').click(function() {
+      reactor.getReaction();
+    });
     laboratory($('#laboratory'));
   });
 
 </script>
 </head>
 <body>
-<div id="reactor"></div>
+<div>
+  <button id="reactbutton">React</button>
+  <div id="reactor"></div>
+</div>
 <div id="laboratory"></div>
 </body>
 </html>
