@@ -1,0 +1,97 @@
+<html>
+<head>
+<script src="jquery-3.3.1.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
+<!-- <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-database.js"></script>
+-->
+<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-firestore.js"></script>
+<!--
+<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-messaging.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-functions.js"></script>
+<script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-storage.js"></script>
+-->
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBjpYowQZ1sewFmHEJl9ZDfDx20rsQ_tZQ",
+    authDomain: "doodle-chemist.firebaseapp.com",
+    databaseURL: "https://doodle-chemist.firebaseio.com",
+    projectId: "doodle-chemist",
+    storageBucket: "doodle-chemist.appspot.com",
+    messagingSenderId: "1086839312639"
+  };
+  firebase.initializeApp(config);
+
+  // "element1:element2" : {  // element1 <= element2
+  //   demand: <nat>
+  //   results: {
+  //     element3: <nat>
+  //     element4: <nat>
+  //     ...
+  //   }
+  var db = firebase.firestore();
+
+  var reactor = function(container) {
+    container.empty();
+    db.collection("reactions").orderBy("demand", "desc").limit(1).get()
+      .then(function(docs) {
+        if (docs.empty) { console.log("No reactions"); return; }
+        var doc = docs.docs[0];
+        var reagents = doc.id.split(":");
+        var proposedBox = $('<input>').attr('type', 'text');
+        var okbutton = $('<button>').text('Ok');
+        container.append(
+          $('<span>').text(reagents[0] + " + " + reagents[1] + " = "),
+          proposedBox,
+          okbutton);
+        
+        var fail = function() {
+          container.append($('<span>').text("Nope"));
+          container.append($('<button>').text("Try again").click(function() { reactor(container); }));
+        };
+        var success = function() {  
+          container.append($('<span>').text("Good job"));
+          container.append($('<button>').text("Do another").click(function() { reactor(container); }));
+        };
+
+        okbutton.click(function() {
+          var proposed = proposedBox.val();
+          var docref = db.collection("reactions").doc(doc.id);
+          db.runTransaction(function(transaction) {
+            return transaction.get(docref)
+              .then(function(q) {
+                var data = q.data();
+                if (!(proposed in data.results)) {
+                  data.results[proposed] = 1;
+                }
+                else {
+                  data.results[proposed]++;
+                }
+                transaction.set(docref, data);
+
+                var proposedCount = data.results[proposed];
+                if (proposedCount < 3) { return false; }
+                for (var i in q.results) {
+                  if (q.results[i] >= proposedCount) { return false; }
+                }
+                return true;
+              });
+          }).then(function(succeeded) {
+            if (succeeded) { success(); } else { fail(); }
+          });
+        });
+      });
+  };
+
+  $(function() {
+    reactor($('#container'));
+  });
+
+</script>
+</head>
+<body>
+<div id="container"></div>
+</body>
+</html>
