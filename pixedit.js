@@ -150,30 +150,31 @@ var handletouch = function(e) {
 
 var palette = $('<span>');
 var paletteColors = [ 
-  "#000000",
-  "#000088",
-  "#0000ff",
-  "#008800",
-  "#008888",
-  "#0088ff",
-  "#00ff00",
-  "#00ffff",
-  "#880000",
-  "#880088",
-  "#8800ff",
-  "#888800",
-  "#888888",
-  "#8888ff",
-  "#88ff00",
-  "#88ff88",
-  "#88ffff",
-  "#ff0000",
-  "#ff00ff",
-  "#ff8800",
-  "#ff88ff",
-  "#ffff00",
-  "#ffff88",
-  "#ffffff"
+  // Crayola 24 color pack
+  "#ee204d",  // red
+  "#fce883",  // yellow
+  "#1f75fe",  // blue
+  "#b4674d",  // brown
+  "#ff7538",  // orange
+  "#1cac78",  // green
+  "#926eae",  // violet
+  "#232323",  // black
+  "#ffaacc",  // carnation pink
+  "#ffb653",  // yellow orange
+  "#199ebd",  // blue green
+  "#888800",  // red violet
+  "#c0448f",  // red orange
+  "#c5e384",  // yellow green
+  "#7366bd",  // blue violet
+  "#ededed",  // white
+  "#f75394",  // violet red
+  "#fddb6d",  // dandelion
+  "#1dacd6",  // cerulean
+  "#fdd9b5",  // apricot
+  "#fc2847",  // scarlet
+  "#f0e891",  // green yellow
+  "#5d76cb",  // indigo
+  "#95918c"   // gray
   ];
 var selectedColor = null;
 for (var i = 0; i < paletteColors.length; i++) {
