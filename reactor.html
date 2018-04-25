@@ -37,7 +37,16 @@
     container.empty();
     db.collection("reactions").orderBy("demand", "desc").limit(1).get()
       .then(function(docs) {
-        if (docs.empty) { console.log("No reactions"); return; }
+        var fail = function() {
+          container.append($('<span>').text("Nope"));
+          container.append($('<button>').text("Try again").click(function() { reactor(container); }));
+        };
+        var success = function() {  
+          container.append($('<span>').text("Good job"));
+          container.append($('<button>').text("Do another").click(function() { reactor(container); }));
+        };
+        if (docs.empty) { console.log("No reactions"); fail(); return; }
+
         var doc = docs.docs[0];
         var reagents = doc.id.split(":");
         var proposedBox = $('<input>').attr('type', 'text');
@@ -47,15 +56,6 @@
           proposedBox,
           okbutton);
         
-        var fail = function() {
-          container.append($('<span>').text("Nope"));
-          container.append($('<button>').text("Try again").click(function() { reactor(container); }));
-        };
-        var success = function() {  
-          container.append($('<span>').text("Good job"));
-          container.append($('<button>').text("Do another").click(function() { reactor(container); }));
-        };
-
         okbutton.click(function() {
           var proposed = proposedBox.val();
           var docref = db.collection("reactions").doc(doc.id);
@@ -85,13 +85,96 @@
       });
   };
 
+
+  var laboratory = function(container) {
+    var elements = ['earth', 'water', 'fire', 'air'];
+    
+    var populate = function() {
+      container.empty();
+      
+      var box1 = $('<span>');
+      var box2 = $('<span>');
+      var boxresult = $('<span>');
+      container.append(box1, $('<span>').text('+'), box2, $('<span>').text('='), boxresult);
+      
+      var compute = function() {
+        if (box1.text() <= box2.text()) {
+          var reaction = box1.text() + ":" + box2.text();
+        }
+        else {
+          var reaction = box2.text() + ":" + box1.text();
+        }
+        var docref = db.collection("reactions").doc(reaction);
+        db.runTransaction(function(transaction) {
+          return transaction.get(docref)
+            .then(function(q) {
+              if (!q.exists) {
+                console.log("Apparently ", docref, " doesn't exist");
+                transaction.set(docref, { demand: 1, results: {} });
+                return null;
+              }
+              var data = q.data();
+              data.demand++;
+              transaction.set(docref, data);
+
+              var best = null;
+              var bestscore = 0;
+              for (var i in data.results) {
+                console.log("Considering ", i, "(", data.results[i], ")");
+                if (data.results[i] > bestscore) {
+                  bestscore = data.results[i];
+                  best = i;
+                }
+              }
+              if (bestscore >= 3) {
+                return best;
+              }
+              else {
+                return null;
+              }
+            });
+        }).then(function(best) {
+          console.log("result = ", best);
+          if (best == null) { populate(); return; }
+          for (var i = 0; i < elements.length; i++) {
+            if (best == elements[i]) { populate(); return; }
+          }
+          elements.push(best);
+          populate();
+        });
+      };
+
+      var select = function(element) {
+        if (box1.text() == "") {
+          box1.text(element);
+        }
+        else if (box2.text() == "") {
+          box2.text(element);
+          compute();
+        }
+      };
+
+      for (var i = 0; i < elements.length; i++) {
+        (function() { 
+          var element = elements[i];
+          var button = $('<button>').text(element).click(function() { select(element) });
+          container.append(button);
+        })();
+      }
+    }; 
+
+    populate();
+  };
+
   $(function() {
-    reactor($('#container'));
+    reactor($('#reactor'));
+    laboratory($('#laboratory'));
   });
 
 </script>
 </head>
 <body>
-<div id="container"></div>
+<div id="reactor"></div>
+<div id="laboratory"></div>
 </body>
 </html>
