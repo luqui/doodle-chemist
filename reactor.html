@@ -1,7 +1,9 @@
 <html>
 <head>
 <script src="jquery-3.3.1.js"></script>
+<script src="utils.js"></script>
 <script src="reactor.js"></script>
+<script src="laboratory.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
 <!-- <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-auth.js"></script>
@@ -35,90 +37,23 @@
   var db = firebase.firestore();
   db.settings({timestampsInSnapshots: true});
 
-  var laboratory = function(container) {
-    var elements = ['earth', 'water', 'fire', 'air'];
-    
-    var populate = function() {
-      container.empty();
-      
-      var box1 = $('<span>');
-      var box2 = $('<span>');
-      var boxresult = $('<span>');
-      container.append(box1, $('<span>').text('+'), box2, $('<span>').text('='), boxresult);
-      
-      var compute = function() {
-        if (box1.text() <= box2.text()) {
-          var reaction = box1.text() + ":" + box2.text();
-        }
-        else {
-          var reaction = box2.text() + ":" + box1.text();
-        }
-        var docref = db.collection("reactions").doc(reaction);
-        db.runTransaction(function(transaction) {
-          return transaction.get(docref)
-            .then(function(q) {
-              if (!q.exists) {
-                transaction.set(docref, { demand: 1, results: {} });
-                return null;
-              }
-              var data = q.data();
-              data.demand++;
-              transaction.set(docref, data);
-
-              var best = null;
-              var bestscore = 0;
-              for (var i in data.results) {
-                if (data.results[i] > bestscore) {
-                  bestscore = data.results[i];
-                  best = i;
-                }
-              }
-              if (bestscore >= 3) {
-                return best;
-              }
-              else {
-                return null;
-              }
-            });
-        }).then(function(best) {
-          if (best == null) { populate(); return; }
-          for (var i = 0; i < elements.length; i++) {
-            if (best == elements[i]) { populate(); return; }
-          }
-          elements.push(best);
-          populate();
-        });
-      };
-
-      var select = function(element) {
-        if (box1.text() == "") {
-          box1.text(element);
-        }
-        else if (box2.text() == "") {
-          box2.text(element);
-          compute();
-        }
-      };
-
-      for (var i = 0; i < elements.length; i++) {
-        (function() { 
-          var element = elements[i];
-          var button = $('<button>').text(element).click(function() { select(element) });
-          container.append(button);
-        })();
-      }
-    }; 
-
-    populate();
-  };
-
   $(function() {
+    var utils = Utils({});
+
     var reactor = Reactor({
       container: $('#reactor')[0],
-      database: db
+      database: db,
+      utils: utils
     });
-    reactor.getReaction();
-    laboratory($('#laboratory'));
+
+    var laboratory = Laboratory({
+      container: $('#laboratory')[0],
+      database: db,
+      utils: utils
+    });
+    
+    reactor.refresh();
+    laboratory.refresh();
   });
 
 </script>

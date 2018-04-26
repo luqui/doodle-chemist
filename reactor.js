@@ -1,34 +1,12 @@
 // params:
 //   container: the element to insert the reactor into
 //   database: the firestore database handle
+//   utils: a Utils module instance
 Reactor = function(PARAMS) {
 
 var frame = $('<div>');
 PARAMS.container.appendChild(frame[0]);
 
-var renderElement = function(elementName) {
-  return $('<span>').text(elementName);
-};
-
-var computeLeader = function(data) {
-  var best = null;
-  var bestScore = 0;
-  for (var i in data.results) {
-    if (data.results[i] > bestScore) {
-      bestScore = data.results[i];
-      best = i;
-    }
-    else if (data.results[i] == bestScore) {
-      best = null;  // If there is a tie, there is no leader
-    }
-  }
-  if (bestScore >= 3) {
-    return best;
-  }
-  else {
-    return null;
-  }
-};
 
 var submitReaction = function(reactionName, proposed, resultBox) {
   proposed = proposed.toLowerCase()
@@ -37,7 +15,7 @@ var submitReaction = function(reactionName, proposed, resultBox) {
                      .replace(/\s+/, ' ');
   if (!proposed.match(/^[a-z0-9 ]+$/)) {
     resultBox.append($('<span>').text('Invalid element name'));
-    return;
+    return PARAMS.utils.pure(null);
   }
 
   var docref = PARAMS.database.collection("reactions").doc(reactionName);
@@ -54,7 +32,7 @@ var submitReaction = function(reactionName, proposed, resultBox) {
         data.demand--;
         transaction.set(docref, data);
 
-        return computeLeader(data);
+        return PARAMS.utils.computeLeader(data);
       });
   }).then(function(leader) {
     if (proposed == leader) {
@@ -77,34 +55,16 @@ var skipReaction = function(reactionName) {
   });
 };
 
-// Pads a promise so that it takes at least `msec` milliseconds to execute.
-var timePad = function(msec, promise) {
-  return new Promise(function(cb) {
-    var promisecb;
-    var timecb;
-  
-    promisecb = function(x) {
-      timecb = function() { cb(x); }
-    };
-    timecb = function() {
-      promisecb = cb;
-    };
-
-    // Cannot eta-contract these functions because they are mutated.
-    setTimeout(function() { timecb(); }, msec);
-    promise.then(function(x) { promisecb(x); });
-  });
-};
 
 var $$ = {};
 
-$$.getReaction = function() {
+$$.refresh = function() {
   PARAMS.database.collection("reactions").orderBy("demand", "desc").limit(10).get()
     .then(function(docs) {
       frame.empty();
       if (docs.empty) {
         frame.append($('<span>').text('No reactions (it must be the beginning of the universe)'),
-                     $('<button>').text('Check again').click(function() { $$.getReaction(); }));
+                     $('<button>').text('Check again').click(function() { $$.refresh(); }));
         return;
       }
 
@@ -115,21 +75,21 @@ $$.getReaction = function() {
       var proposedBox = $('<input>').attr('type', 'text');
       var resultBox = $('<div>');
 
-      frame.append(renderElement(reagents[0]), 
+      frame.append(PARAMS.utils.renderElement(reagents[0]), 
                    $('<span>').text('+'),
-                   renderElement(reagents[1]), 
+                   PARAMS.utils.renderElement(reagents[1]), 
                    $('<span>').text('='),
                    proposedBox,
                    $('<button>').text('Skip').click(function() {
                       proposedBox.attr('disabled', true);
-                      skipReaction(doc.id).then($$.getReaction);
+                      skipReaction(doc.id).then($$.refresh);
                    }),
                    resultBox);
       proposedBox.keyup(function(e) {
         if (e.keyCode == 13) {
           proposedBox.attr('disabled', true);
-          timePad(2000, submitReaction(doc.id, proposedBox.val(), resultBox))
-            .then($$.getReaction);
+          PARAMS.utils.timePad(2000, submitReaction(doc.id, proposedBox.val(), resultBox))
+            .then($$.refresh);
         }
       });
       proposedBox.focus();
