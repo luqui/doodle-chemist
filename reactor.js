@@ -41,7 +41,7 @@ var submitReaction = function(reactionName, proposed, resultBox) {
   }
 
   var docref = PARAMS.database.collection("reactions").doc(reactionName);
-  db.runTransaction(function(transaction) {
+  return db.runTransaction(function(transaction) {
     return transaction.get(docref)
       .then(function(q) {
         var data = q.data();
@@ -66,10 +66,40 @@ var submitReaction = function(reactionName, proposed, resultBox) {
   });
 };
 
+var skipReaction = function(reactionName) {
+  var docref = PARAMS.database.collection("reactions").doc(reactionName);
+  return db.runTransaction(function(transaction) {
+    return transaction.get(docref)
+      .then(function(q) {
+        demand = q.data().demand;
+        transaction.update(docref, { demand: demand-1 });
+      });
+  });
+};
+
+// Pads a promise so that it takes at least `msec` milliseconds to execute.
+var timePad = function(msec, promise) {
+  return new Promise(function(cb) {
+    var promisecb;
+    var timecb;
+  
+    promisecb = function(x) {
+      timecb = function() { cb(x); }
+    };
+    timecb = function() {
+      promisecb = cb;
+    };
+
+    // Cannot eta-contract these functions because they are mutated.
+    setTimeout(function() { timecb(); }, msec);
+    promise.then(function(x) { promisecb(x); });
+  });
+};
+
 var $$ = {};
 
 $$.getReaction = function() {
-  PARAMS.database.collection("reactions").orderBy("demand", "desc").limit(1).get()
+  PARAMS.database.collection("reactions").orderBy("demand", "desc").limit(10).get()
     .then(function(docs) {
       frame.empty();
       if (docs.empty) {
@@ -78,7 +108,9 @@ $$.getReaction = function() {
         return;
       }
 
-      var doc  = docs.docs[0];
+      var which = Math.floor(Math.random()*docs.size);
+
+      var doc  = docs.docs[which];
       var reagents = doc.id.split(':');
       var proposedBox = $('<input>').attr('type', 'text');
       var resultBox = $('<div>');
@@ -88,12 +120,19 @@ $$.getReaction = function() {
                    renderElement(reagents[1]), 
                    $('<span>').text('='),
                    proposedBox,
+                   $('<button>').text('Skip').click(function() {
+                      proposedBox.attr('disabled', true);
+                      skipReaction(doc.id).then($$.getReaction);
+                   }),
                    resultBox);
       proposedBox.keyup(function(e) {
         if (e.keyCode == 13) {
-          submitReaction(doc.id, proposedBox.val(), resultBox);
+          proposedBox.attr('disabled', true);
+          timePad(2000, submitReaction(doc.id, proposedBox.val(), resultBox))
+            .then($$.getReaction);
         }
       });
+      proposedBox.focus();
     });
 };
 

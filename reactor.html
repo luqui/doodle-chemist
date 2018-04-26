@@ -117,19 +117,14 @@
       container: $('#reactor')[0],
       database: db
     });
-    $('#reactbutton').click(function() {
-      reactor.getReaction();
-    });
+    reactor.getReaction();
     laboratory($('#laboratory'));
   });
 
 </script>
 </head>
 <body>
-<div>
-  <button id="reactbutton">React</button>
-  <div id="reactor"></div>
-</div>
+<div id="reactor"></div>
 <div id="laboratory"></div>
 </body>
 </html>
