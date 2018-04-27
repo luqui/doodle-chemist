@@ -3,10 +3,14 @@
   src: url('ArcadeClassic.ttf')
 }
 .pixedit {
-  width: 642px;
+  width: 640px;
   margin: auto;
 }
-.pixedit .mainCanvas {
+.pixedit .mainCanvas  {
+  background-image: url('transparent-background-16x16.png');
+  background-repeat: repeat, repeat;
+}
+.pixedit .palette {
   background-image: url('transparent-background-16x16.png');
   background-repeat: repeat, repeat;
 }

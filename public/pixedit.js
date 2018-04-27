@@ -82,7 +82,12 @@ var putpixel = function(x,y) {
     }
     touched[PARAMS.width*x + y] = 1;
   }
-  cx.fillRect(x*PARAMS.scale, y*PARAMS.scale, PARAMS.scale, PARAMS.scale);
+  if (cx.fillStyle == 'rgba(0, 0, 0, 0)') {
+    cx.clearRect(x*PARAMS.scale, y*PARAMS.scale, PARAMS.scale, PARAMS.scale);
+  }
+  else {
+    cx.fillRect(x*PARAMS.scale, y*PARAMS.scale, PARAMS.scale, PARAMS.scale);
+  }
 };
 
 var findPos = function(obj) {
@@ -147,10 +152,10 @@ var handletouch = function(e) {
   }
 };
 
-var palette = $('<span>');
+var palette = $('<div>').addClass('palette');
 var paletteColors = [ 
   // Crayola 24 color pack
-  "#ee204d",  // red
+  "rgba(0, 0, 0, 0)", // transparent
   "#fce883",  // yellow
   "#1f75fe",  // blue
   "#b4674d",  // brown
@@ -158,7 +163,8 @@ var paletteColors = [
   "#1cac78",  // green
   "#926eae",  // violet
   "#232323",  // black
-  "#ffaacc",  // carnation pink
+  "#ee204d",  // red
+  //"#ffaacc",  // carnation pink
   "#ffb653",  // yellow orange
   "#199ebd",  // blue green
   "#888800",  // red violet
@@ -181,7 +187,9 @@ for (var i = 0; i < paletteColors.length; i++) {
     var color = paletteColors[i];
     var entry = $('<span>').addClass('paletteColor')
                            .css('background-color', color);
-    if (selectedColor == null) { selectedColor = entry; }
+    if (color == "#232323") {  // start with black
+      selectedColor = entry;
+    }
     entry.click(function(e) {
       cx.fillStyle = color;
       selectedColor.removeClass('selected');
