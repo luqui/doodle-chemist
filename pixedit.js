@@ -216,36 +216,41 @@ PARAMS.container.appendChild(canvas);
 PARAMS.container.appendChild($('<div>').append(
   palette)[0]);
 
-$$.toArray = function() {
-  var data = Array(PARAMS.height * PARAMS.width * 4);
-  for (var y = 0; y < PARAMS.height; y++) {
-    for (var x = 0; x < PARAMS.width; x++) {
-      var imgdata = cx.getImageData(PARAMS.scale*x,PARAMS.scale*y,1,1);
-      var ix = 4*(PARAMS.width*y + x);
-      data[ix + 0] = imgdata.data[0];
-      data[ix + 1] = imgdata.data[1];
-      data[ix + 2] = imgdata.data[2];
-      data[ix + 3] = imgdata.data[3];
+$$.toGif = function() {
+  return new Promise(function(cb) {
+    var gif = new GIF({ 
+      workers: 2,
+      quality: 10,
+      transparent: 'rgba(0,0,0,0)',
+      width: PARAMS.width,
+      height: PARAMS.height,
+      workerScript: 'site/gif.worker.js'   // TODO: yuck factor this out
+    });
+    
+    var canvas = $('<canvas>').attr('width', PARAMS.width)
+                              .attr('height', PARAMS.height)[0];
+    document.body.appendChild(canvas);
+    var renderCx = canvas.getContext('2d');
+
+    for (var y = 0; y < PARAMS.height; y++) {
+      for (var x = 0; x < PARAMS.width; x++) {
+        var imgdata = cx.getImageData(PARAMS.scale*x, PARAMS.scale*y, 1, 1).data;
+        var color = rgbaToHex(imgdata[0], imgdata[1], imgdata[2], imgdata[3]);
+        renderCx.fillStyle = 'rgba(' + imgdata.join(',') + ')';
+        renderCx.fillRect(x,y,1,1);
+      }
     }
-  }
-  return data;
+    setTimeout(function() {
+      gif.addFrame(canvas);
+      
+      gif.on('finished', cb);
+      gif.render();
+    }, 1000);
+  });
 };
 
 var rgbaToHex = function(r,g,b,a) {
   return "#" + ("00000000" + ((r << 24) | (g << 16) | (b << 8) | a).toString(16)).slice(-8);
-};
-
-$$.loadArray = function(data) {
-  var prevFillStyle = cx.fillStyle;
-  cx.clearRect(0, 0, canvas.width, canvas.height);
-  for (var y = 0; y < PARAMS.height; y++) {
-    for (var x = 0; x < PARAMS.width; x++) {
-      var ix = 4*(PARAMS.width*y + x);
-      cx.fillStyle = rgbaToHex(data[ix+0], data[ix+1], data[ix+2], data[ix+3]);
-      cx.fillRect(x*PARAMS.scale, y*PARAMS.scale, PARAMS.scale, PARAMS.scale);
-    }
-  }
-  cx.fillStyle = prevFillStyle;
 };
 
 return $$;

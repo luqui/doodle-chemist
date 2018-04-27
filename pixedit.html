@@ -7,6 +7,8 @@ body {
 </style>
 <link rel="stylesheet" type="text/css" href="pixedit.css" />
 <script src="site/jquery-3.3.1.js"></script>
+<script src="site/gif.js"></script>
+<script src="site/gif.worker.js"></script>
 <script src="pixedit.js"></script>
 <script>
 $(function() {
@@ -18,22 +20,15 @@ $(function() {
     height: 32,
     scale: 20,
     modlimit: 32*32,
-    base: "/Users/lukepalmer/Library/Application Support/Steam/Steam.AppBundle/Steam/Contents/MacOS/tenfoot/resource/images/generic.jpg",
-    title: "Unununium"
-  });
-
-  $('#save').click(function() {
-    data = editor.toArray();
-  });
-  $('#load').click(function() {
-    editor.loadArray(data);
+    title: "Unununium",
+    callback: function() {
+      editor.toGif().then(function(blob) { window.open(URL.createObjectURL(blob)) });
+    }
   });
 });
 </script>
 </head>
 <body>
 <div class="pixedit" id="container"></div>
-<button id="save">Save</button>
-<button id="load">Load</button>
 </body>
 </html>
