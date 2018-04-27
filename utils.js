@@ -1,5 +1,6 @@
 // params:
-//   getImage: get an image { 'url', 'ordinal' } promise
+//   firestore: firestore database
+//   storage:   google cloud storage database
 Utils = function(PARAMS) {
 
 var $$ = {};
@@ -24,6 +25,65 @@ $$.computeLeader = function(data) {
   }
 };
 
+var imageCache = {};
+
+$$.getImage = function(element) {
+  // This function is very tricky, because we need to handle the case when
+  // two getImage calls happen right next to each other.  In this case, we
+  // return the *same* promise for both of them, so that when the image is
+  // finally fetched, they both get triggered.
+  // However, we subscribe to updates, so we have a *mutable* cacheEntry
+  // within the per-element promise that is created, and that is what is
+  // updated, so that future calls to getImage will get the updated image.
+  // (We don't bother making the <img> tags that are created dynamically 
+  // update).
+  
+  if (element in imageCache) {
+    return imageCache[element];
+  }
+  
+  return imageCache[element] = new Promise(function(cb) {
+    var callbackOnce = function(x) {
+      if (cb) {
+        var tempcb = cb;
+        // We signal it this way so that we don't keep a continuation
+        // reference and it can be garbage collected;
+        cb = null;
+        return tempcb(x);
+      }
+    };
+
+    var cacheEntry = { };
+
+    PARAMS.firestore.collection("elements").doc(element).onSnapshot(function(doc) {
+      if (doc.exists) {
+        var data = doc.data();
+        imgname = data.imgname;
+        var ref = PARAMS.storage.ref('elements').child(element).child(imgname);
+        ref.getDownloadURL().then(function(url) {
+          cacheEntry.url = url;
+          cacheEntry.ordinal = data.ordinal;
+          callbackOnce(cacheEntry);
+        });
+      }
+      else {
+        callbackOnce(cacheEntry);
+      }
+    });
+  });
+};
+
+
+$$.putImage = function(element, blob, ordinal) {
+  var id = Math.floor(1e6*Math.random());
+  var imgname = ordinal + "_" + id + ".gif";
+  var ref = PARAMS.storage.ref('elements').child(element).child(imgname);
+  return ref.put(blob, { contentType: 'image/gif' }).then(function() { 
+    var docref = PARAMS.firestore.collection("elements").doc(element);
+    docref.set({ imgname: imgname, ordinal: ordinal });
+  });
+};
+
 $$.renderElement = function(elementName) {
   var imgtag = $('<img>').css('image-rendering', 'pixelated')
                          .attr('width', 64);
@@ -31,8 +91,8 @@ $$.renderElement = function(elementName) {
                        .append(imgtag)
                        .append($('<br/>'))
                        .append($('<span>').text(elementName));
-  PARAMS.getImage(elementName).then(function(img) {
-    if (img) {
+  $$.getImage(elementName).then(function(img) {
+    if (img.url) {
       imgtag.attr('src', img.url);
     }
   });
