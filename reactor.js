@@ -21,7 +21,7 @@ var submitReaction = function(reactionName, proposed, resultBox) {
   }
 
   var docref = PARAMS.database.collection("reactions").doc(reactionName);
-  return db.runTransaction(function(transaction) {
+  return PARAMS.database.runTransaction(function(transaction) {
     return transaction.get(docref)
       .then(function(q) {
         var data = q.data();
@@ -52,7 +52,7 @@ var submitReaction = function(reactionName, proposed, resultBox) {
 
 var skipReaction = function(reactionName) {
   var docref = PARAMS.database.collection("reactions").doc(reactionName);
-  return db.runTransaction(function(transaction) {
+  return PARAMS.database.runTransaction(function(transaction) {
     return transaction.get(docref)
       .then(function(q) {
         demand = q.data().demand;
@@ -76,8 +76,8 @@ $$.refresh = function() {
 
       var which = Math.floor(Math.random()*docs.size);
 
-      var doc  = docs.docs[which];
-      var reagents = doc.id.split(':');
+      var reaction  = 'water:water';//docs.docs[which].id;
+      var reagents = reaction.split(':');
       var proposedBox = $('<input>').attr('type', 'text');
       var resultBox = $('<div>');
 
@@ -88,13 +88,13 @@ $$.refresh = function() {
                    proposedBox,
                    $('<button>').text('Skip').click(function() {
                       proposedBox.attr('disabled', true);
-                      skipReaction(doc.id).then($$.refresh);
+                      skipReaction(reaction).then($$.refresh);
                    }),
                    resultBox);
       proposedBox.keyup(function(e) {
         if (e.keyCode == 13) {
           proposedBox.attr('disabled', true);
-          submitReaction(doc.id, proposedBox.val(), resultBox);
+          submitReaction(reaction, proposedBox.val(), resultBox);
         }
       });
       proposedBox.focus();

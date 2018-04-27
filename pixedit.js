@@ -19,12 +19,10 @@ cx.fillStyle = '#000000';
 
 var baseimg = null;
 var baseimg_loaded = false;
-if (PARAMS.base !== undefined) {
-  if (typeof(PARAMS.base) === 'string') {
-    baseimg = $('<img>').attr('src', PARAMS.base)
-                        [0];
-    baseimg.onload = function() { baseimg_loaded = true; reset() };
-  }
+if (typeof(PARAMS.base) === 'string') {
+  baseimg = $('<img>').attr('src', PARAMS.base)
+                      [0];
+  baseimg.onload = function() { baseimg_loaded = true; reset() };
 }
 else if (PARAMS.base) {
   baseimg_loaded = true;

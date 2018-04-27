@@ -37,8 +37,10 @@
   //     element4: <nat>
   //     ...
   //   }
-  var db = firebase.firestore();
-  db.settings({timestampsInSnapshots: true});
+  var firestore = firebase.firestore();
+  firestore.settings({timestampsInSnapshots: true});
+
+  var storage = firebase.storage();
 
   $(function() {
     var utils = Utils({});
@@ -48,23 +50,59 @@
       reactor.refresh();
     };
 
+    var getImage = function(element) {
+      return new Promise(function(cb) {
+        firestore.collection("elements").doc(element).get()
+          .then(function(doc) {
+            if (doc.exists) {
+              var data = doc.data();
+              var imgname = data.imgname;
+              var ref = storage.ref('elements').child(element).child(imgname);
+              ref.getDownloadURL().then(function(url) {
+                cb({
+                  'url': url,
+                  'ordinal': data.ordinal
+                });
+              });
+            }
+            else {
+              cb(null);
+            }
+          });
+      });
+    };
+
+    var putImage = function(element, blob, ordinal) {
+      var id = Math.floor(1e6*Math.random());
+      var imgname = ordinal + "_" + id + ".gif";
+      var ref = storage.ref('elements').child(element).child(imgname);
+      return ref.put(blob, { contentType: 'image/gif' }).then(function() { 
+        var docref = firestore.collection("elements").doc(element);
+        docref.set({ imgname: imgname, ordinal: ordinal });
+      });
+    };
+
     var reactor = Reactor({
       container: $('#reactor')[0],
-      database: db,
+      database: firestore,
       onMatch: function(element) {
-        var editor = PixEditor({
-          container: $('#editor')[0],
-          width: 32,
-          height: 32,
-          scale: 20,
-          modlimit: 32*32,
-          callback: function() {
-            editor.toGif().then(function(blob) {
-              window.open(URL.createObjectURL(blob));
-              refreshReactor();
-            });
-          },
-          title: element
+        getImage(element).then(function(img) {
+          var editor = PixEditor({
+            container: $('#editor')[0],
+            width: 32,
+            height: 32,
+            scale: 20,
+            modlimit: 32*32,
+            base: img ? img.url : null,
+            callback: function() {
+              editor.toGif().then(function(blob) {
+                return putImage(element, blob, img ? img.ordinal+1 : 0);
+              }).then(function() {
+                refreshReactor();
+              });
+            },
+            title: element
+          });
         });
       },
       onNoMatch: function() {
@@ -76,7 +114,7 @@
 
     var laboratory = Laboratory({
       container: $('#laboratory')[0],
-      database: db,
+      database: firestore,
       utils: utils
     });
     
