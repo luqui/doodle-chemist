@@ -15,9 +15,13 @@ var submitReaction = function(reactionName, proposed, resultBox) {
                      .replace(/^\s+/, '')
                      .replace(/\s+$/, '')
                      .replace(/\s+/, ' ');
+  if (!proposed) {
+    resultBox.append($('<span>').text('Skipped'));
+    return skipReaction(reactionName).then(PARAMS.onNoMatch);
+  }
   if (!proposed.match(/^[a-z0-9 ]+$/)) {
     resultBox.append($('<span>').text('Invalid element name'));
-    return PARAMS.utils.pure(null);
+    return PARAMS.onNoMatch();
   }
 
   var docref = PARAMS.database.collection("reactions").doc(reactionName);
@@ -86,10 +90,6 @@ $$.refresh = function() {
                    PARAMS.utils.renderElement(reagents[1]), 
                    $('<span>').text('='),
                    proposedBox,
-                   $('<button>').text('Skip').click(function() {
-                      proposedBox.attr('disabled', true);
-                      skipReaction(reaction).then($$.refresh);
-                   }),
                    resultBox);
       proposedBox.keyup(function(e) {
         if (e.keyCode == 13) {
