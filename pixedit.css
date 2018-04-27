@@ -1,0 +1,65 @@
+.pixedit .paletteColor {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+  border: 8px solid #664433;
+}
+.pixedit .paletteColor:hover {
+  border: 8px solid #ccaa88;
+}
+.pixedit .paletteColor.selected, .paletteColor.selected:hover {
+  border: 8px solid white;
+}
+.pixedit span.resetButton{
+  display: inline-block;
+  width: 80px;
+}
+.pixedit span.doneButton {
+  display: inline-block;
+  width: 80px;
+}
+.pixedit span.elementTitle {
+  display: inline-block;
+  width: 320px;
+  height: 100%;
+  text-align: center;
+}
+.pixedit span.modsCounter {
+  display: inline-block;
+  width: 160px;
+  height: 100%;
+  text-align: center;
+}
+.pixedit .resetButton button, .doneButton button {
+  display: inline-block;
+  border: none;
+  font-family: monospace;
+  width: 100%;
+  height: 100%;
+  font-size: 20px;
+}
+.pixedit .resetButton button {
+  background-color: #eeee66;
+  margin-right: auto;
+}
+.pixedit .doneButton button {
+  background-color: #66ee66;
+  margin-left: auto;
+}
+.pixedit .topBar {
+  width: 640px;
+  height: 40px;
+  border-spacing: 0;
+  background-color: #664433;
+  color: white;
+}
+.pixedit .elementTitle {
+  font-family: monospace;
+  font-size: 24px;
+  width: 320px;
+}
+.pixedit .modsCounter {
+  font-family: monospace;
+  font-size: 20px;
+  width: 160px;
+}
