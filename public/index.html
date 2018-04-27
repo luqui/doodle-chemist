@@ -48,27 +48,40 @@
       storage: storage
     });
 
+    var limits = [
+      512,512,
+      384,384,
+      256,256,
+      192, 128, 96, 64, 48, 32, 24, 16, 12, 8, 6, 4, 3, 2, 1];
+
     var reactor = Reactor({
       container: $('#reactor')[0],
       database: firestore,
       onMatch: function(element) {
         utils.getImage(element).then(function(img) {
-          var editor = PixEditor({
-            container: $('#editor')[0],
-            width: 32,
-            height: 32,
-            scale: 20,
-            modlimit: 32*32,
-            base: img.url,
-            callback: function() {
-              editor.toGif().then(function(blob) {
-                return utils.putImage(element, blob, img.ordinal == null ? 0 : img.ordinal+1);
-              }).then(function() {
-                refreshReactor();
-              });
-            },
-            title: element
-          });
+          if (img.ordinal == null) { img.ordinal = 0; }
+          if (img.ordinal < limits.length) {
+            var editor = PixEditor({
+              container: $('#editor')[0],
+              width: 32,
+              height: 32,
+              scale: 20,
+              modlimit: limits[img.ordinal],
+              base: img.url,
+              callback: function() {
+                editor.toGif().then(function(blob) {
+                  return utils.putImage(element, blob, img.ordinal == null ? 0 : img.ordinal+1);
+                }).then(function() {
+                  refreshReactor();
+                });
+              },
+              title: element
+            });
+          }
+          else {
+            $('#editor').text("Match!");
+            utils.delay(2000).then(refreshReactor);
+          }
         });
       },
       onNoMatch: function() {
