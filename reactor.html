@@ -1,9 +1,11 @@
 <html>
 <head>
+<link rel="stylesheet" type="text/css" href="pixedit.css" />
 <script src="jquery-3.3.1.js"></script>
 <script src="utils.js"></script>
 <script src="reactor.js"></script>
 <script src="laboratory.js"></script>
+<script src="pixedit.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
 <!-- <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-auth.js"></script>
@@ -49,8 +51,15 @@
       container: $('#reactor')[0],
       database: db,
       onMatch: function(element) {
-        $('#editor').text(element);
-        utils.delay(2000).then(refreshReactor);
+        PixEditor({
+          container: $('#editor')[0],
+          width: 32,
+          height: 32,
+          scale: 20,
+          modlimit: 32*32,
+          callback: refreshReactor,
+          title: element
+        });
       },
       onNoMatch: function() {
         $('#editor').text("No match");
@@ -73,7 +82,7 @@
 </head>
 <body>
 <div id="reactor"></div>
-<div id="editor"></div>
+<div id="editor" class="pixedit"></div>
 <div id="laboratory"></div>
 </body>
 </html>

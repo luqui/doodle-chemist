@@ -1,3 +1,7 @@
+.pixedit {
+  width: 642px;
+  margin: auto;
+}
 .pixedit .paletteColor {
   display: inline-block;
   width: 64px;
