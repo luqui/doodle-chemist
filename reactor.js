@@ -1,6 +1,8 @@
 // params:
 //   container: the element to insert the reactor into
 //   database: the firestore database handle
+//   onMatch: callback to call when a match is made (arg: match)
+//   onNoMatch: callback to call when a match is not made (no arg)
 //   utils: a Utils module instance
 Reactor = function(PARAMS) {
 
@@ -36,10 +38,14 @@ var submitReaction = function(reactionName, proposed, resultBox) {
       });
   }).then(function(leader) {
     if (proposed == leader) {
-      resultBox.append($('<span>').text('Yes!'));
+      if (PARAMS.onMatch) {
+        PARAMS.onMatch(leader);
+      }
     }
     else {
-      resultBox.append($('<span>').text('No!'));
+      if (PARAMS.onNoMatch) {
+        PARAMS.onNoMatch();
+      }
     }
   });
 };
@@ -88,8 +94,7 @@ $$.refresh = function() {
       proposedBox.keyup(function(e) {
         if (e.keyCode == 13) {
           proposedBox.attr('disabled', true);
-          PARAMS.utils.timePad(2000, submitReaction(doc.id, proposedBox.val(), resultBox))
-            .then($$.refresh);
+          submitReaction(doc.id, proposedBox.val(), resultBox);
         }
       });
       proposedBox.focus();

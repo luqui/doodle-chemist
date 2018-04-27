@@ -40,9 +40,22 @@
   $(function() {
     var utils = Utils({});
 
+    var refreshReactor = function() {
+      $('#editor').empty();
+      reactor.refresh();
+    };
+
     var reactor = Reactor({
       container: $('#reactor')[0],
       database: db,
+      onMatch: function(element) {
+        $('#editor').text(element);
+        utils.delay(2000).then(refreshReactor);
+      },
+      onNoMatch: function() {
+        $('#editor').text("No match");
+        utils.delay(2000).then(refreshReactor);
+      },
       utils: utils
     });
 
@@ -60,6 +73,7 @@
 </head>
 <body>
 <div id="reactor"></div>
+<div id="editor"></div>
 <div id="laboratory"></div>
 </body>
 </html>
