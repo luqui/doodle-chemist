@@ -10,7 +10,8 @@ PixEditor = function(PARAMS) {
 
 var $$ = {};
 
-var canvas = $('<canvas>').attr('width', PARAMS.width * PARAMS.scale)
+var canvas = $('<canvas>').addClass('mainCanvas')
+                          .attr('width', PARAMS.width * PARAMS.scale)
                           .attr('height', PARAMS.height * PARAMS.scale)
                           [0];
 var cx = canvas.getContext('2d');

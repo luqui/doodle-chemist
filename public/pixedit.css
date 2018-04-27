@@ -6,6 +6,10 @@
   width: 642px;
   margin: auto;
 }
+.pixedit .mainCanvas {
+  background-image: url('transparent-background-16x16.png');
+  background-repeat: repeat, repeat;
+}
 .pixedit .paletteColor {
   display: inline-block;
   width: 64px;
