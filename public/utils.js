@@ -85,9 +85,8 @@ $$.putImage = function(element, blob, ordinal) {
 };
 
 $$.renderElement = function(elementName) {
-  var imgtag = $('<img>').css('image-rendering', 'pixelated')
-                         .attr('width', 64);
-  var ret = $('<span>').css('display', 'inline-block')
+  var imgtag = $('<img>');
+  var ret = $('<span>').addClass('element')
                        .append(imgtag)
                        .append($('<br/>'))
                        .append($('<span>').text(elementName));

@@ -6,7 +6,7 @@
 //   utils: a Utils module instance
 Reactor = function(PARAMS) {
 
-var frame = $('<div>');
+var frame = $('<div>').addClass('equation');
 PARAMS.container.appendChild(frame[0]);
 
 
@@ -86,9 +86,9 @@ $$.refresh = function() {
       var resultBox = $('<div>');
 
       frame.append(PARAMS.utils.renderElement(reagents[0]), 
-                   $('<span>').text('+'),
+                   $('<span>').addClass('operator').text('+'),
                    PARAMS.utils.renderElement(reagents[1]), 
-                   $('<span>').text('='),
+                   $('<span>').addClass('operator').text('='),
                    proposedBox,
                    resultBox);
       proposedBox.keyup(function(e) {

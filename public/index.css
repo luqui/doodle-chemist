@@ -1,0 +1,55 @@
+body {
+  background-color: black;
+}
+@font-face {
+  font-family: Arcade;
+  src: url('ArcadeClassic.ttf');
+}
+#chemist {
+  width: 642px;
+  margin: auto;
+  padding: 10px;
+  border: 10px solid #886644;
+  background-color: #aa8866;
+}
+#chemist .element {
+  display: inline-block;
+  border: 4px solid black;
+  text-align: center;
+  width: 64px;
+  height: 80px;
+  font-family: Arcade, monospace;
+}
+#chemist .element img {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  border: none;
+}
+#reactor input {
+  position: relative;
+  font-family: Arcade, monospace;
+  background: #886644;
+  font-size: 20px;
+  color: white;
+  width: 200px;
+  top: -36px;
+  border: 8px solid black;
+}
+#reactor input:focus {
+  border: 8px solid #1f75fe;
+  outline: none;
+}
+#reactor .operator {
+  position: relative;
+  display: inline-block;
+  font-size: 40px;
+  height: 40px;
+  font-family: Arcade, monospace;
+  vertical-align: middle;
+  top: -40px;
+}
+#reactor .equation {
+  width: 408px;
+  margin: auto;
+}
