@@ -227,7 +227,6 @@ $$.toGif = function() {
     
     var canvas = $('<canvas>').attr('width', PARAMS.width)
                               .attr('height', PARAMS.height)[0];
-    document.body.appendChild(canvas);
     var renderCx = canvas.getContext('2d');
 
     for (var y = 0; y < PARAMS.height; y++) {

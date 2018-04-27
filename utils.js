@@ -1,5 +1,5 @@
 // params:
-//   (none)
+//   getImage: get an image { 'url', 'ordinal' } promise
 Utils = function(PARAMS) {
 
 var $$ = {};
@@ -25,7 +25,18 @@ $$.computeLeader = function(data) {
 };
 
 $$.renderElement = function(elementName) {
-  return $('<span>').text(elementName);
+  var imgtag = $('<img>').css('image-rendering', 'pixelated')
+                         .attr('width', 64);
+  var ret = $('<span>').css('display', 'inline-block')
+                       .append(imgtag)
+                       .append($('<br/>'))
+                       .append($('<span>').text(elementName));
+  PARAMS.getImage(elementName).then(function(img) {
+    if (img) {
+      imgtag.attr('src', img.url);
+    }
+  });
+  return ret;
 };
 
 $$.delay = function(msec) {

@@ -77,7 +77,8 @@ $$.refresh = function() {
   for (var i = 0; i < elements.length; i++) {
     (function() {
       var element = elements[i];
-      elementsBox.append($('<button>').text(element).click(function() { select(element) }));
+      elementsBox.append($('<button>').append(PARAMS.utils.renderElement(element))
+                                      .click(function() { select(element) }));
     })();
   }
 };

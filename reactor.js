@@ -76,7 +76,7 @@ $$.refresh = function() {
 
       var which = Math.floor(Math.random()*docs.size);
 
-      var reaction  = 'water:water';//docs.docs[which].id;
+      var reaction  = docs.docs[which].id;
       var reagents = reaction.split(':');
       var proposedBox = $('<input>').attr('type', 'text');
       var resultBox = $('<div>');

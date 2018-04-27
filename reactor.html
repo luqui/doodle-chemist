@@ -43,8 +43,6 @@
   var storage = firebase.storage();
 
   $(function() {
-    var utils = Utils({});
-
     var refreshReactor = function() {
       $('#editor').empty();
       reactor.refresh();
@@ -60,8 +58,8 @@
               var ref = storage.ref('elements').child(element).child(imgname);
               ref.getDownloadURL().then(function(url) {
                 cb({
-                  'url': url,
-                  'ordinal': data.ordinal
+                  url: url,
+                  ordinal: data.ordinal
                 });
               });
             }
@@ -71,6 +69,9 @@
           });
       });
     };
+    
+    var utils = Utils({getImage: getImage}); // XXX Bad design
+
 
     var putImage = function(element, blob, ordinal) {
       var id = Math.floor(1e6*Math.random());
