@@ -54,36 +54,39 @@
       256,256,
       192, 128, 96, 64, 48, 32, 24, 16, 12, 8, 6, 4, 3, 2, 1];
 
+    var editElement = function(element) {
+      // TODO untangle into promise-returning code
+      utils.getImage(element).then(function(img) {
+        if (img.ordinal == null) { img.ordinal = 0; }
+        if (img.ordinal < limits.length) {
+          var editor = PixEditor({
+            container: $('#editor')[0],
+            width: 32,
+            height: 32,
+            scale: 20,
+            modlimit: limits[img.ordinal],
+            base: img.url,
+            callback: function() {
+              editor.toGif().then(function(blob) {
+                return utils.putImage(element, blob, img.ordinal == null ? 0 : img.ordinal+1);
+              }).then(function() {
+                refreshReactor();
+              });
+            },
+            title: element
+          });
+        }
+        else {
+          $('#editor').text("Match!");
+          utils.delay(2000).then(refreshReactor);
+        }
+      });
+    };
+
     var reactor = Reactor({
       container: $('#reactor')[0],
       database: firestore,
-      onMatch: function(element) {
-        utils.getImage(element).then(function(img) {
-          if (img.ordinal == null) { img.ordinal = 0; }
-          if (img.ordinal < limits.length) {
-            var editor = PixEditor({
-              container: $('#editor')[0],
-              width: 32,
-              height: 32,
-              scale: 20,
-              modlimit: limits[img.ordinal],
-              base: img.url,
-              callback: function() {
-                editor.toGif().then(function(blob) {
-                  return utils.putImage(element, blob, img.ordinal == null ? 0 : img.ordinal+1);
-                }).then(function() {
-                  refreshReactor();
-                });
-              },
-              title: element
-            });
-          }
-          else {
-            $('#editor').text("Match!");
-            utils.delay(2000).then(refreshReactor);
-          }
-        });
-      },
+      onMatch: editElement,
       onNoMatch: function() {
         $('#editor').text("No match");
         utils.delay(2000).then(refreshReactor);
@@ -97,7 +100,14 @@
       utils: utils
     });
     
-    reactor.refresh();
+    var qsrx = /.*[?&]edit=(\w+)/;
+    var qsedit = qsrx.exec(window.location.href);
+    if (qsedit) {
+      editElement(qsedit[1].replace('+', ' '));
+    }
+    else {
+      reactor.refresh();
+    }
     laboratory.refresh();
   });
 
