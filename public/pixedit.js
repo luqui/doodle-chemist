@@ -21,9 +21,20 @@ cx.fillStyle = '#000000';
 var baseimg = null;
 var baseimg_loaded = false;
 if (typeof(PARAMS.base) === 'string') {
-  baseimg = $('<img>').attr('src', PARAMS.base)
-                      [0];
-  baseimg.onload = function() { baseimg_loaded = true; reset() };
+  var xhr = new XMLHttpRequest();
+  xhr.responseType = 'blob';
+  xhr.onload = function() { 
+    var url = URL.createObjectURL(xhr.response);
+    window.open(url);
+    baseimg = $('<img>')[0];
+    baseimg.onload = function() { 
+      baseimg_loaded = true;
+      reset();
+    };
+    $(baseimg).attr('src', url);
+  };
+  xhr.open('GET', PARAMS.base);
+  xhr.send();
 }
 else if (PARAMS.base) {
   baseimg_loaded = true;
