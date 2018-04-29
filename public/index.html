@@ -54,11 +54,12 @@
       256,256,
       192, 128, 96, 64, 48, 32, 24, 16, 12, 8, 6, 4, 3, 2, 1];
 
-    var editElement = function(element) {
+    var editElement = function(element, statsText) {
       // TODO untangle into promise-returning code
       utils.getImage(element).then(function(img) {
         if (img.ordinal == null) { img.ordinal = 0; }
         if (img.ordinal < limits.length) {
+          $('#editor').text(statsText + " You may contribute " + limits[img.ordinal] + " pixels to this image.");
           var editor = PixEditor({
             container: $('#editor')[0],
             width: 32,
@@ -77,7 +78,7 @@
           });
         }
         else {
-          $('#editor').text("Match!");
+          $('#editor').text("Hit! " + statsText);
           utils.delay(2000).then(refreshReactor);
         }
       });
@@ -87,9 +88,9 @@
       container: $('#reactor')[0],
       database: firestore,
       onMatch: editElement,
-      onNoMatch: function() {
-        $('#editor').text("No match");
-        utils.delay(2000).then(refreshReactor);
+      onNoMatch: function(statsText) {
+        $('#editor').text("Miss. " + statsText);
+        utils.delay(5000).then(refreshReactor);
       },
       utils: utils
     });

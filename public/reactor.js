@@ -38,17 +38,19 @@ var submitReaction = function(reactionName, proposed, resultBox) {
         data.demand--;
         transaction.set(docref, data);
 
-        return PARAMS.utils.computeLeader(data);
+        return data;
       });
-  }).then(function(leader) {
+  }).then(function(data) {
+    var leader = PARAMS.utils.computeLeader(data);
     if (proposed == leader) {
       if (PARAMS.onMatch) {
-        PARAMS.onMatch(leader);
+        PARAMS.onMatch(leader, (data.results[proposed]-1) + ' others answered "' + proposed + '".');
       }
     }
     else {
       if (PARAMS.onNoMatch) {
-        PARAMS.onNoMatch();
+        PARAMS.onNoMatch((data.results[proposed]-1) + ' others answered "' + proposed 
+                         + '" and the current leader has ' + (data.results[leader]||0) + ' answers.');
       }
     }
   });
