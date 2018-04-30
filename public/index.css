@@ -2,8 +2,8 @@ body {
   background-color: black;
 }
 @font-face {
-  font-family: Arcade;
-  src: url('ArcadeClassic.ttf');
+  font-family: pixel;
+  src: url('8BitOperatorPlusSC-Regular.ttf');
 }
 #chemist {
   width: 642px;
@@ -18,7 +18,7 @@ body {
   text-align: center;
   width: 64px;
   height: 80px;
-  font-family: Arcade, monospace;
+  font-family: pixel, monospace;
 }
 #chemist .element img {
   width: 64px;
@@ -28,7 +28,7 @@ body {
 }
 #reactor input {
   position: relative;
-  font-family: Arcade, monospace;
+  font-family: pixel, monospace;
   background: #886644;
   font-size: 20px;
   color: white;
@@ -41,7 +41,7 @@ body {
   outline: none;
 }
 #editor {
-  font-family: Arcade, monospace;
+  font-family: pixel, monospace;
   font-size: 20px;
   text-align: center;
 }
@@ -50,7 +50,7 @@ body {
   display: inline-block;
   font-size: 40px;
   height: 40px;
-  font-family: Arcade, monospace;
+  font-family: pixel, monospace;
   vertical-align: middle;
   top: -40px;
 }
@@ -59,6 +59,6 @@ body {
   margin: auto;
 }
 h1 {
-  font-family: Arcade, monospace;
+  font-family: pixel, monospace;
   text-align: center;
 }
