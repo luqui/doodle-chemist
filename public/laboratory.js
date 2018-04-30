@@ -2,6 +2,7 @@
 //   container: the container to add the lab element to
 //   database: the firestore database object
 //   utils: a Utils module instance
+//   cookies: a Cookies module instance
 Laboratory = function(PARAMS) {
 
 var $$ = {};
@@ -9,7 +10,20 @@ var $$ = {};
 var frame = $('<div>');
 PARAMS.container.appendChild(frame[0]);
 
-var elements = ['earth', 'water', 'fire', 'air'];
+var elements = PARAMS.cookies.getJSON('elements') || ['earth', 'water', 'fire', 'air'];
+
+var addElement = function(element) {
+    for (var i = 0; i < elements.length; i++) {
+      if (element == elements[i]) { return; }
+    }
+    elements.push(element);
+    PARAMS.cookies.set('elements', elements);
+};
+
+$$.resetCookies = function() {
+  PARAMS.cookies.remove('elements');
+  elements = ['earth', 'water', 'fire', 'air'];
+};
 
 $$.refresh = function() {
   frame.empty();
@@ -63,10 +77,7 @@ $$.refresh = function() {
         var cont = function() { 
           PARAMS.utils.delay(2000).then(function() { $$.refresh() });
         };
-        for (var i = 0; i < elements.length; i++) {
-          if (leader == elements[i]) { cont(); return; }
-        }
-        elements.push(leader);
+        addElement(leader);
         cont();
       }
     });

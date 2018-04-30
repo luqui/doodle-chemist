@@ -9,6 +9,7 @@
 <script src="pixedit.js"></script>
 <script src="site/jquery-3.3.1.js"></script>
 <script src="site/gif.js"></script>
+<script src="site/js.cookie.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase.js"></script>
 <!-- <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/4.13.0/firebase-auth.js"></script>
@@ -98,7 +99,8 @@
     var laboratory = Laboratory({
       container: $('#laboratory')[0],
       database: firestore,
-      utils: utils
+      utils: utils,
+      cookies: Cookies
     });
     
     var qsrx = /.*[?&]edit=(\w+)/;
@@ -109,6 +111,11 @@
     else {
       reactor.refresh();
     }
+  
+    if (window.location.href.match(/.*[?&]reset/)) {
+      laboratory.resetCookies();
+    }
+
     laboratory.refresh();
   });
 
